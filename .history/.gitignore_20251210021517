@@ -1,0 +1,53 @@
+# Warranty Tracker - .gitignore
+
+# Environment files - NEVER COMMIT THESE!
+.env
+.env.local
+.env.production
+
+# Logs - contain sensitive information
+logs/
+*.log
+
+# Database dumps
+*.sql
+*.sql.gz
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.backup
+backup/
+
+# PHP
+vendor/
+composer.lock
+
+# Session files
+sessions/
+
+# Uploaded files (if any)
+uploads/
+files/
+
+# Keep important files
+!.env.example
+!.gitignore
+!README.md
+!SECURITY_SETUP.md
