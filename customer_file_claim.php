@@ -102,16 +102,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $appliance) {
                 "viewclaim.php"
             );
             
-            try {
-                $emailObj->sendClaimConfirmationEmail(
-                    $owner_email,
-                    $owner_name,
-                    $appliance_name,
-                    $claim_id,
-                    date('F d, Y', strtotime($claim["claim_date"]))
-                );
-            } catch (Exception $e) {
-               
+            // Send email to owner
+            if ($owner_email) {
+                try {
+                    $result = $emailObj->sendClaimConfirmationEmail(
+                        $owner_email,
+                        $owner_name,
+                        $appliance_name,
+                        $claim_id,
+                        date('F d, Y', strtotime($claim["claim_date"]))
+                    );
+                    
+                    if (!$result) {
+                        error_log("Email sending failed for claim ID: {$claim_id} to {$owner_email}");
+                    }
+                } catch (Exception $e) {
+                    error_log("Email exception for claim ID: {$claim_id} - " . $e->getMessage());
+                }
             }
             
             

@@ -120,7 +120,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 <div class="form-group">
                     <label for="password">Password <span class="required">*</span></label>
-                    <input type="password" name="password" id="password" class="form-control" required>
+                    <div style="position: relative;">
+                        <input type="password" name="password" id="password" class="form-control" required>
+                        <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #667eea;"></i>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary btn-block">
@@ -141,5 +144,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <p class="link-text"><a href="customer_warranty_tracker.php"><i class="fas fa-arrow-left"></i> Back to Customer Portal</a></p>
         </div>
     </div>
+    
+    <script>
+        // Toggle password visibility
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
 </html>

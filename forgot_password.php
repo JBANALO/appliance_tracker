@@ -1,7 +1,9 @@
 <?php
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/EmailNotification.php';
+
 session_start();
-require_once "database.php";
-require_once "EmailNotification.php";
 
 $message = "";
 $error = "";
@@ -15,48 +17,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = "Invalid email format";
     } else {
-        $db = new Database();
-        $conn = $db->connect();
-        
-        $stmt = $conn->prepare("SELECT id, name, email FROM admin WHERE email = :email");
-        $stmt->bindParam(":email", $email);
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($user) {
-            $verification_code = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-            $reset_expires = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-       
-            $stmt = $conn->prepare("UPDATE admin SET reset_token = :code, reset_expires = :expires WHERE email = :email");
-            $stmt->bindParam(":code", $verification_code);
-            $stmt->bindParam(":expires", $reset_expires);
+        try {
+            $db = new Database();
+            $conn = $db->connect();
+            
+            $stmt = $conn->prepare("SELECT id, name, email FROM admin WHERE email = :email");
             $stmt->bindParam(":email", $email);
             $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            $emailNotif = new EmailNotification();
-            
-            $email_message = "
-                <h2>Password Reset Request</h2>
-                <p>Hello, {$user['name']}!</p>
-                <p>We received a request to reset your password for your Warranty Tracker account.</p>
-                <div class='highlight'>
-                    <strong>Your Verification Code:</strong><br>
-                    <span style='font-size: 32px; font-weight: bold; color: #4a5568; letter-spacing: 5px;'>{$verification_code}</span>
-                </div>
-                <p>Enter this code on the verification page to reset your password.</p>
-                <p><strong>This code will expire in 15 minutes.</strong></p>
-                <p>If you didn't request a password reset, please ignore this email.</p>
-            ";
-            
-            if ($emailNotif->sendEmail($email, $user['name'], "Password Reset Code", $email_message)) {
-                $_SESSION['reset_email'] = $email;
-                header("Location: verify_reset_code.php");
-                exit;
+            if ($user) {
+                $verification_code = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+                $reset_expires = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+           
+                $stmt = $conn->prepare("UPDATE admin SET reset_token = :code, reset_expires = :expires WHERE email = :email");
+                $stmt->bindParam(":code", $verification_code);
+                $stmt->bindParam(":expires", $reset_expires);
+                $stmt->bindParam(":email", $email);
+                $stmt->execute();
+                
+                $emailNotif = new EmailNotification();
+                
+                $email_message = "
+                    <h2>Password Reset Request</h2>
+                    <p>Hello, {$user['name']}!</p>
+                    <p>We received a request to reset your password for your Warranty Tracker account.</p>
+                    <div class='highlight'>
+                        <strong>Your Verification Code:</strong><br>
+                        <span style='font-size: 32px; font-weight: bold; color: #4a5568; letter-spacing: 5px;'>{$verification_code}</span>
+                    </div>
+                    <p>Enter this code on the verification page to reset your password.</p>
+                    <p><strong>This code will expire in 15 minutes.</strong></p>
+                    <p>If you didn't request a password reset, please ignore this email.</p>
+                ";
+                
+                if ($emailNotif->sendEmail($email, $user['name'], "Password Reset Code", $email_message)) {
+                    $_SESSION['reset_email'] = $email;
+                    header("Location: verify_reset_code.php");
+                    exit;
+                } else {
+                    $error = "Failed to send email. Please check that SMTP is configured properly in the .env file. Contact the administrator if the problem persists.";
+                    error_log("Email send failed for: " . $email);
+                }
             } else {
-                $error = "Failed to send email. Please try again later.";
+                $message = "If an account with that email exists, a verification code has been sent.";
             }
-        } else {
-            $message = "If an account with that email exists, a verification code has been sent.";
+        } catch (Exception $e) {
+            $error = "An error occurred. Please try again later.";
+            error_log("Forgot password error: " . $e->getMessage());
         }
     }
 }

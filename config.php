@@ -1,4 +1,19 @@
 <?php
+// Load .env file FIRST if it exists
+if (file_exists(__DIR__ . '/.env')) {
+    $lines = file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        if (!empty($name) && !empty($value)) {
+            putenv($name . '=' . $value);
+        }
+    }
+}
+
 // Security Configuration
 define('APP_ENV', getenv('APP_ENV') ?: 'development');
 define('APP_DEBUG', getenv('APP_DEBUG') === 'true' ? true : false);
@@ -6,7 +21,7 @@ define('APP_URL', getenv('APP_URL') ?: 'http://localhost');
 
 // Database Configuration
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'warranty_tracker');
+define('DB_NAME', getenv('DB_NAME') ?: 'warranty_trackerr');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: '');
 
@@ -32,15 +47,5 @@ if (APP_ENV === 'production') {
 } else {
     ini_set('display_errors', 1);
     error_reporting(E_ALL);
-}
-
-// Load .env file if exists
-if (file_exists(__DIR__ . '/.env')) {
-    $lines = file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        list($name, $value) = explode('=', $line, 2);
-        putenv(trim($name) . '=' . trim($value));
-    }
 }
 ?>

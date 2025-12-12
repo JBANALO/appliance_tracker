@@ -128,7 +128,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 <div class="form-group">
                     <label for="password">Password <span class="required">*</span></label>
-                    <input type="password" name="password" id="password" class="form-control" required>
+                    <div style="position: relative;">
+                        <input type="password" name="password" id="password" class="form-control" required>
+                        <i class="fas fa-eye" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #667eea;"></i>
+                    </div>
                     <?php if (!empty($errors["password"])): ?>
                         <span class="error"><?= $errors["password"] ?></span>
                     <?php endif; ?>
@@ -136,7 +139,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 <div class="form-group">
                     <label for="confirm_password">Confirm Password <span class="required">*</span></label>
-                    <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
+                    <div style="position: relative;">
+                        <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
+                        <i class="fas fa-eye" id="toggleConfirmPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #667eea;"></i>
+                    </div>
                     <?php if (!empty($errors["confirm_password"])): ?>
                         <span class="error"><?= $errors["confirm_password"] ?></span>
                     <?php endif; ?>
@@ -156,5 +162,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <p class="link-text"><a href="customer_warranty_tracker.php"><i class="fas fa-arrow-left"></i> Back to Customer Portal</a></p>
         </div>
     </div>
+    
+    <script>
+        // Toggle password visibility
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+        
+        // Toggle confirm password visibility
+        const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
+        const confirmPassword = document.querySelector('#confirm_password');
+        
+        toggleConfirmPassword.addEventListener('click', function () {
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
 </html>

@@ -7,6 +7,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 require_once "Claim.php";
+require_once "EmailNotification.php";
 
 $id = $_GET['id'] ?? null;
 
@@ -23,13 +24,36 @@ if (!$claim) {
     exit;
 }
 
+$claimStatus = $claim['claim_status'];
+$dropdownStatuses = ['Pending', 'Approved', 'Rejected'];
+
+if ($claimStatus === 'Approved') {
+    $dropdownStatuses = ['Approved'];
+} elseif ($claimStatus === 'Rejected') {
+    $dropdownStatuses = ['Rejected'];
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $new_status = $_POST['status'] ?? '';
-    $admin_notes = $_POST['admin_notes'] ?? '';
-    
-    if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-        header("Location: viewclaim.php");
-        exit;
+    $new_status = trim($_POST['status'] ?? '');
+    $admin_notes = trim($_POST['admin_notes'] ?? '');
+
+    $allowed_statuses = $dropdownStatuses;
+
+    if (in_array($new_status, $allowed_statuses, true)) {
+        if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
+            $emailNotification = new EmailNotification();
+            $emailNotification->sendClaimStatusUpdateEmail(
+                $claim['email'],
+                $claim['owner_name'],
+                $claim['appliance_name'],
+                $id,
+                $new_status,
+                $admin_notes
+            );
+
+            header("Location: viewclaim.php?status_updated=1");
+            exit;
+        }
     }
 }
 ?>
@@ -327,9 +351,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="info-value"><?= htmlspecialchars($claim['claim_date']) ?></div>
             </div>
             <div class="info-row">
-                <div class="info-label">Current Status:</div>
+                <div class="info-label">Claim Status:</div>
                 <div class="info-value">
-                    <span class="status-badge status-<?= strtolower($claim['status']) ?>">
+                    <span class="status-badge status-<?= strtolower(str_replace(' ', '-', $claim['claim_status'])) ?>">
+                        <?= htmlspecialchars($claim['claim_status']) ?>
+                    </span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Warranty Status:</div>
+                <div class="info-value">
+                    <span class="status-badge status-<?= strtolower(str_replace(' ', '-', $claim['status'])) ?>">
                         <?= htmlspecialchars($claim['status']) ?>
                     </span>
                 </div>
@@ -367,9 +399,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         Status
                     </label>
                     <select name="status" id="status" required>
-                        <option value="Pending" <?= $claim['status'] == 'Pending' ? 'selected' : '' ?>>Pending</option>
-                        <option value="Approved" <?= $claim['status'] == 'Approved' ? 'selected' : '' ?>>Approved</option>
-                        <option value="Rejected" <?= $claim['status'] == 'Rejected' ? 'selected' : '' ?>>Rejected</option>
+                        <?php foreach ($dropdownStatuses as $statusOption): ?>
+                            <option value="<?= $statusOption ?>" <?= $claim['claim_status'] == $statusOption ? 'selected' : '' ?>><?= $statusOption ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
