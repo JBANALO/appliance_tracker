@@ -13,10 +13,14 @@ require_once "database.php";
 require_once "Appliance.php";
 require_once "Owner.php";
 
+// Fetch all owners for dropdown
+$ownerObj = new Owner();
+$owners = $ownerObj->viewOwner();
+
 $appliance = [
     "appliance_name" => "", "model_number" => "", "serial_number" => "",
     "purchase_date" => "", "warranty_period" => "", "warranty_end_date" => "",
-    "status" => "", "owner" => "", "owner_name" => ""
+    "status" => "", "owner" => ""
 ];
 
 $errors = [
@@ -24,32 +28,6 @@ $errors = [
     "purchase_date" => "", "warranty_period" => "", "warranty_end_date" => "",
     "status" => "", "owner" => ""
 ];
-
-$id = isset($_GET['id']) ? $_GET['id'] : null;
-
-if (!$id) {
-    header("Location: viewappliance.php");
-    exit;
-}
-
-$applianceObj = new Appliance();
-$existingAppliance = $applianceObj->fetchAppliance($id);
-
-if (!$existingAppliance) {
-    header("Location: viewappliance.php");
-    exit;
-}
-
-$db = new Database();
-$sql_get_owner = "SELECT owner_name FROM owner WHERE id = :owner_id";
-$query_get_owner = $db->connect()->prepare($sql_get_owner);
-$query_get_owner->bindParam(':owner_id', $existingAppliance['owner_id']);
-$query_get_owner->execute();
-$owner_data = $query_get_owner->fetch();
-
-// Fetch all owners for dropdown
-$ownerObj = new Owner();
-$owners = $ownerObj->viewOwner();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $appliance["appliance_name"] = trim(htmlspecialchars($_POST["appliance_name"] ?? ""));
@@ -59,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $appliance["warranty_period"] = trim(htmlspecialchars($_POST["warranty_period"] ?? ""));
     $appliance["warranty_end_date"] = trim(htmlspecialchars($_POST["warranty_end_date"] ?? ""));
     $appliance["status"] = trim(htmlspecialchars($_POST["status"] ?? ""));
-    $appliance["owner_name"] = trim(htmlspecialchars($_POST["owner_name"] ?? ""));
+    $appliance["owner"] = trim(htmlspecialchars($_POST["owner"] ?? ""));
 
     if (empty($appliance["appliance_name"])) {
         $errors["appliance_name"] = "Appliance name is required";
@@ -84,27 +62,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($appliance["status"])) {
         $errors["status"] = "Please select a status";
     }
-    if (empty($appliance["owner_name"])) {
+    if (empty($appliance["owner"])) {
         $errors["owner"] = "Owner is required";
     }
 
     if (!array_filter($errors)) {
-        $sql_find_owner = "SELECT id FROM owner WHERE owner_name = :owner_name";
-        $query_find_owner = $db->connect()->prepare($sql_find_owner);
-        $query_find_owner->bindParam(':owner_name', $appliance["owner_name"]);
-        $query_find_owner->execute();
-        $owner_result = $query_find_owner->fetch();
-
-        if ($owner_result) {
-            $owner_id = $owner_result['id'];
-        } else {
-            $sql_create_owner = "INSERT INTO owner (owner_name) VALUES (:owner_name)";
-            $query_create_owner = $db->connect()->prepare($sql_create_owner);
-            $query_create_owner->bindParam(':owner_name', $appliance["owner_name"]);
-            $query_create_owner->execute();
-            $owner_id = $db->connect()->lastInsertId();
-        }
-
+        $applianceObj = new Appliance();
         $applianceObj->appliance_name = $appliance["appliance_name"];
         $applianceObj->model_number = $appliance["model_number"];
         $applianceObj->serial_number = $appliance["serial_number"];
@@ -112,24 +75,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $applianceObj->warranty_period = $appliance["warranty_period"];
         $applianceObj->warranty_end_date = $appliance["warranty_end_date"];
         $applianceObj->status = $appliance["status"];
-        $applianceObj->owner_id = $owner_id;
+        $applianceObj->owner_id = $appliance["owner"]; // Fixed: use owner_id
 
-        if ($applianceObj->updateAppliance($id)) {
+        if ($applianceObj->addAppliance()) {
             header("Location: viewappliance.php");
             exit;
         } else {
-            echo "Failed to update appliance.";
+            echo "Failed to add appliance.";
         }
     }
-} else {
-    $appliance["appliance_name"] = $existingAppliance["appliance_name"];
-    $appliance["model_number"] = $existingAppliance["model_number"];
-    $appliance["serial_number"] = $existingAppliance["serial_number"];
-    $appliance["purchase_date"] = $existingAppliance["purchase_date"];
-    $appliance["warranty_period"] = $existingAppliance["warranty_period"];
-    $appliance["warranty_end_date"] = $existingAppliance["warranty_end_date"];
-    $appliance["status"] = $existingAppliance["status"];
-    $appliance["owner_name"] = $owner_data ? $owner_data['owner_name'] : '';
 }
 ?>
 <!DOCTYPE html>
@@ -137,19 +91,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Appliance</title>
+    <title>Add Appliance</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <a href="viewappliance.php" class="back-btn">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
-            <h1 style="font-size: 28px; color: #667eea; margin: 20px 0 0 0;">
-                <i class="fas fa-edit"></i> Edit Appliance
+            <h1>
+                <i class="fas fa-laptop"></i> Add Appliance
             </h1>
+            <a href="viewappliance.php" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to List
+            </a>
         </div>
 
         <div class="info-box">
@@ -163,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="appliance_name">
                         Appliance Name <span class="required">*</span>
                     </label>
-                    <input type="text" name="appliance_name" id="appliance_name" value="<?= htmlspecialchars($appliance["appliance_name"]) ?>" required>
+                    <input type="text" name="appliance_name" id="appliance_name" value="<?= $appliance["appliance_name"] ?>" required>
                     <?php if ($errors["appliance_name"]): ?>
                         <p class="error"><i class="fas fa-exclamation-circle"></i> <?= $errors["appliance_name"] ?></p>
                     <?php endif; ?>
@@ -173,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="model_number">
                         Model Number <span class="required">*</span>
                     </label>
-                    <input type="text" name="model_number" id="model_number" value="<?= htmlspecialchars($appliance["model_number"]) ?>" required>
+                    <input type="text" name="model_number" id="model_number" value="<?= $appliance["model_number"] ?>" required>
                     <?php if ($errors["model_number"]): ?>
                         <p class="error"><i class="fas fa-exclamation-circle"></i> <?= $errors["model_number"] ?></p>
                     <?php endif; ?>
@@ -185,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="serial_number">
                         Serial Number <span class="required">*</span>
                     </label>
-                    <input type="text" name="serial_number" id="serial_number" value="<?= htmlspecialchars($appliance["serial_number"]) ?>" required>
+                    <input type="text" name="serial_number" id="serial_number" value="<?= $appliance["serial_number"] ?>" required>
                     <?php if ($errors["serial_number"]): ?>
                         <p class="error"><i class="fas fa-exclamation-circle"></i> <?= $errors["serial_number"] ?></p>
                     <?php endif; ?>
@@ -195,7 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="purchase_date">
                         Purchase Date <span class="required">*</span>
                     </label>
-                    <input type="date" name="purchase_date" id="purchase_date" value="<?= htmlspecialchars($appliance["purchase_date"]) ?>" required>
+                    <input type="date" name="purchase_date" id="purchase_date" value="<?= $appliance["purchase_date"] ?>" required>
                     <?php if ($errors["purchase_date"]): ?>
                         <p class="error"><i class="fas fa-exclamation-circle"></i> <?= $errors["purchase_date"] ?></p>
                     <?php endif; ?>
@@ -207,7 +162,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="warranty_period">
                         Warranty Period (Years) <span class="required">*</span>
                     </label>
-                    <input type="number" name="warranty_period" id="warranty_period" value="<?= htmlspecialchars($appliance["warranty_period"]) ?>" min="1" required>
+                    <input type="number" name="warranty_period" id="warranty_period" value="<?= $appliance["warranty_period"] ?>" placeholder="e.g., 1, 2, 3" min="1" required>
                     <?php if ($errors["warranty_period"]): ?>
                         <p class="error"><i class="fas fa-exclamation-circle"></i> <?= $errors["warranty_period"] ?></p>
                     <?php endif; ?>
@@ -217,7 +172,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="warranty_end_date">
                         Warranty End Date <span class="required">*</span>
                     </label>
-                    <input type="date" name="warranty_end_date" id="warranty_end_date" value="<?= htmlspecialchars($appliance["warranty_end_date"]) ?>" required>
+                    <input type="date" name="warranty_end_date" id="warranty_end_date" value="<?= $appliance["warranty_end_date"] ?>" required>
                     <?php if ($errors["warranty_end_date"]): ?>
                         <p class="error"><i class="fas fa-exclamation-circle"></i> <?= $errors["warranty_end_date"] ?></p>
                     <?php endif; ?>
@@ -230,10 +185,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         Status <span class="required">*</span>
                     </label>
                     <select name="status" id="status" required>
-                        <option value="">-- Select Status --</option>
-                        <option value="Active" <?= $appliance["status"] == "Active" ? "selected" : "" ?>>Active</option>
-                        <option value="Expired" <?= $appliance["status"] == "Expired" ? "selected" : "" ?>>Expired</option>
-                        <option value="Pending" <?= $appliance["status"] == "Pending" ? "selected" : "" ?>>Pending</option>
+                        <option value="">--Select--</option>
+                        <option value="Active" <?= $appliance["status"]=="Active" ? "selected" : "" ?>>Active</option>
+                        <option value="Expired" <?= $appliance["status"]=="Expired" ? "selected" : "" ?>>Expired</option>
+                        <option value="Pending" <?= $appliance["status"]=="Pending" ? "selected" : "" ?>>Pending</option>
                     </select>
                     <?php if ($errors["status"]): ?>
                         <p class="error"><i class="fas fa-exclamation-circle"></i> <?= $errors["status"] ?></p>
@@ -241,16 +196,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="form-group">
-                    <label for="owner_search">
+                    <label for="owner">
                         Owner <span class="required">*</span>
                     </label>
-                    <input type="text" name="owner_search" id="owner_search" list="owner-list" value="<?= htmlspecialchars($appliance["owner_name"]) ?>" placeholder="Search owner by name or email..." required autocomplete="off">
-                    <input type="hidden" name="owner_name" id="owner_name" value="<?= htmlspecialchars($appliance["owner_name"]) ?>">
+                    <input type="text" name="owner" id="owner" list="owner-list" value="<?= $appliance["owner"] ?>" placeholder="Search owner by name or email..." required autocomplete="off">
                     <datalist id="owner-list">
                         <?php 
                         if ($owners && count($owners) > 0) {
                             foreach ($owners as $owner) {
-                                echo "<option value='{$owner["owner_name"]}' data-email='{$owner["email"]}'>{$owner["owner_name"]} - {$owner["email"]}</option>";
+                                echo "<option value='{$owner["id"]}' data-name='{$owner["owner_name"]}' data-email='{$owner["email"]}'>{$owner["owner_name"]} - {$owner["email"]}</option>";
                             }
                         }
                         ?>
@@ -264,12 +218,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             </div>
 
-            <div class="button-group" style="display: grid; grid-template-columns: 1fr; gap: 10px; max-width: 400px; margin: 0 auto;">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i>
-                    Update Appliance
+            <div class="button-group">
+                <button type="submit">
+                    <i class="fas fa-plus-circle"></i>
+                    Add Appliance
                 </button>
-                <a href="viewappliance.php" class="btn btn-secondary">
+                <a href="viewappliance.php" class="btn-secondary">
                     <i class="fas fa-times"></i>
                     Cancel
                 </a>
@@ -287,7 +241,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 const date = new Date(purchaseDate);
                 date.setFullYear(date.getFullYear() + parseInt(warrantyPeriod));
                 
-             
+                // Format date as YYYY-MM-DD for input type="date"
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
@@ -296,21 +250,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         
-
+        // Add event listeners
         document.getElementById('purchase_date').addEventListener('change', calculateWarrantyEndDate);
         document.getElementById('warranty_period').addEventListener('input', calculateWarrantyEndDate);
 
-       
-        const ownerSearch = document.getElementById('owner_search');
-        const ownerHidden = document.getElementById('owner_name');
+        // Enhanced owner search functionality
+        const ownerInput = document.getElementById('owner');
+        const ownerDatalist = document.getElementById('owner-list');
         
-        ownerSearch.addEventListener('input', function(e) {
-            ownerHidden.value = e.target.value;
+        ownerInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const options = ownerDatalist.querySelectorAll('option');
+            
+            // If user selects from datalist, set the value to owner ID
+            options.forEach(option => {
+                const name = option.getAttribute('data-name').toLowerCase();
+                const email = option.getAttribute('data-email').toLowerCase();
+                const displayText = option.text.toLowerCase();
+                
+                if (e.target.value === option.text.split(' - ')[0] || 
+                    e.target.value === option.text) {
+                    e.target.value = option.value;
+                }
+            });
         });
 
+        // Show owner name when ID is pre-filled
+        window.addEventListener('DOMContentLoaded', function() {
+            const currentValue = ownerInput.value;
+            if (currentValue) {
+                const options = ownerDatalist.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value === currentValue) {
+                        ownerInput.value = option.getAttribute('data-name');
+                    }
+                });
+            }
+        });
 
+        // Before form submit, ensure we have owner ID
         document.querySelector('form').addEventListener('submit', function(e) {
-            ownerHidden.value = ownerSearch.value;
+            const ownerValue = ownerInput.value;
+            const options = ownerDatalist.querySelectorAll('option');
+            let found = false;
+            
+            options.forEach(option => {
+                if (option.getAttribute('data-name') === ownerValue || 
+                    option.getAttribute('data-email') === ownerValue ||
+                    option.text.includes(ownerValue)) {
+                    ownerInput.value = option.value;
+                    found = true;
+                }
+            });
+            
+            if (!found && isNaN(ownerValue)) {
+                e.preventDefault();
+                alert('Please select a valid owner from the list');
+            }
         });
     </script>
 </body>

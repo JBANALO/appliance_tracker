@@ -180,7 +180,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <i class="fas fa-user-plus"></i>
                     Add Owner
                 </button>
-                <a href="viewowner.php" class="btn btn-secondary">
+                <a href="viewowner.php" class="btn-secondary">
                     <i class="fas fa-times"></i>
                     Cancel
                 </a>
