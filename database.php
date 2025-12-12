@@ -18,7 +18,7 @@ class Database {
 
     public function connect() {
         try {
-        
+            // Explicitly use TCP/IP connection with port
             $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbname};charset=utf8mb4";
             
             $pdo = new PDO($dsn, 
@@ -31,7 +31,6 @@ class Database {
                           ]);
             return $pdo;
         } catch (PDOException $e) {
-           
             error_log("Database connection failed: " . $e->getMessage());
             
             if (APP_DEBUG) {
