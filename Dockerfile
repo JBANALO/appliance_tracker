@@ -13,7 +13,7 @@ WORKDIR /var/www/html
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Remove ALL Apache MPM modules and reinstall only prefork
+# Fix MPM issue - v2 (added comment to bust cache)
 RUN apt-get update && \
     apt-get remove -y apache2-bin && \
     apt-get install -y apache2 && \
