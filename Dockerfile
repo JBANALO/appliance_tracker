@@ -9,26 +9,31 @@ RUN apt-get update && apt-get install -y \
 # Copy application files
 COPY . /var/www/html/
 
-# Set permissions
+# Set correct permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+    && chmod -R 755 /var/www/html \
+    && find /var/www/html -type f -exec chmod 644 {} \;
 
-# Configure Nginx
+# Configure Nginx with login.php as default index
 RUN echo 'server { \n\
     listen 80; \n\
     server_name _; \n\
     root /var/www/html; \n\
-    index index.php index.html; \n\
+    index login.php index.php index.html index.htm; \n\
     \n\
     location / { \n\
-        try_files $uri $uri/ /index.php?$query_string; \n\
+        try_files $uri $uri/ /login.php?$query_string; \n\
     } \n\
     \n\
     location ~ \.php$ { \n\
-        fastcgi_pass 127.0.0.1:9000; \n\
-        fastcgi_index index.php; \n\
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \n\
         include fastcgi_params; \n\
+        fastcgi_pass 127.0.0.1:9000; \n\
+        fastcgi_index login.php; \n\
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \n\
+    } \n\
+    \n\
+    location ~ /\.ht { \n\
+        deny all; \n\
     } \n\
 }' > /etc/nginx/sites-available/default
 
