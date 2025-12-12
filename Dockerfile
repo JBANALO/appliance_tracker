@@ -6,6 +6,9 @@ RUN docker-php-ext-install mysqli pdo pdo_mysql
 # Enable Apache mod_rewrite for .htaccess
 RUN a2enmod rewrite
 
+# Disable all MPMs first, then enable only mpm_prefork
+RUN a2dismod mpm_event mpm_worker && a2enmod mpm_prefork
+
 # Copy application files
 COPY . /var/www/html/
 
