@@ -6,22 +6,17 @@ class Database {
     private $dbname;
     private $username;
     private $password;
-    private $port;
 
     public function __construct() {
         $this->host = DB_HOST;
         $this->dbname = DB_NAME;
         $this->username = DB_USER;
         $this->password = DB_PASS;
-        $this->port = defined('DB_PORT') ? DB_PORT : '3306';
     }
 
     public function connect() {
         try {
-            // Explicitly use TCP/IP connection with port
-            $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbname};charset=utf8mb4";
-            
-            $pdo = new PDO($dsn, 
+            $pdo = new PDO("mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4", 
                           $this->username, 
                           $this->password,
                           [
@@ -31,6 +26,7 @@ class Database {
                           ]);
             return $pdo;
         } catch (PDOException $e) {
+            // Log error without exposing details
             error_log("Database connection failed: " . $e->getMessage());
             
             if (APP_DEBUG) {
