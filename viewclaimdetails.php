@@ -41,15 +41,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (in_array($new_status, $allowed_statuses, true)) {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-            $emailNotification = new EmailNotification();
-            $emailNotification->sendClaimStatusUpdateEmail(
-                $claim['email'],
-                $claim['owner_name'],
-                $claim['appliance_name'],
-                $id,
-                $new_status,
-                $admin_notes
-            );
+            // Send email non-blocking
+            try {
+                @$emailNotification = new EmailNotification();
+                @$emailNotification->sendClaimStatusUpdateEmail(
+                    $claim['email'],
+                    $claim['owner_name'],
+                    $claim['appliance_name'],
+                    $id,
+                    $new_status,
+                    $admin_notes
+                );
+            } catch (Exception $e) {
+                // Silently fail - don't block update
+            }
 
             header("Location: viewclaim.php?status_updated=1");
             exit;
