@@ -11,7 +11,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 
 require_once "database.php";
 require_once "appliance.php";
-require_once "Owner.php";
+require_once "owner.php";
 
 // Fetch all owners for dropdown
 $ownerObj = new Owner();
