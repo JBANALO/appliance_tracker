@@ -9,7 +9,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
     exit;
 }
 
-require_once "Admin.php";
+require_once "admin.php";
 
 $success_message = "";
 $form = ["username" => "", "name" => "", "email" => "", "password" => "", "confirm_password" => ""];

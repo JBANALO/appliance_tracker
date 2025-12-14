@@ -1,6 +1,6 @@
 <?php
 require_once "database.php";
-require_once "Owner.php";
+require_once "owner.php";
 
 $ownerObj = new Owner();
 

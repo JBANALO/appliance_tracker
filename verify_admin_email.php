@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "Admin.php";
+require_once "admin.php";
 
 $success_message = "";
 $error_message = "";

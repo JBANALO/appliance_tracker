@@ -1,8 +1,8 @@
 <?php
 require_once "database.php";
-require_once "Appliance.php";
-require_once "Owner.php";
-require_once "Claim.php";
+require_once "appliance.php";
+require_once "owner.php";
+require_once "claim.php";
 
 $applianceObj = new Appliance();
 $ownerObj = new Owner();

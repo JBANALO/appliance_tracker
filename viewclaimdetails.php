@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-require_once "Claim.php";
+require_once "claim.php";
 require_once "EmailNotification.php";
 
 $id = $_GET['id'] ?? null;
