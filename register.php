@@ -60,11 +60,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $adminObj->is_verified = 0;
             
             if ($adminObj->register()) {
-                // Try to send verification email but don't block if it fails
+                // Send verification email asynchronously (don't wait for it)
                 try {
                     @require_once "EmailNotification.php";
                     if (class_exists('EmailNotification')) {
                         $emailNotification = new EmailNotification();
+                        // Set mail timeout to 5 seconds max to prevent blocking
                         @$emailNotification->sendAdminVerificationEmail(
                             $form["email"], 
                             $form["name"], 
@@ -73,6 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 } catch (Exception $e) {
                     // Silently fail - don't block registration
+                    error_log("Email send failed during registration: " . $e->getMessage());
                 }
                 
                 $success_message = "Registration successful! You can now login with your username and password.";
