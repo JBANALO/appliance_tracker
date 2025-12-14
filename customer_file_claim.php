@@ -100,26 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $appliance) {
                 "viewclaim.php"
             );
             
-            // Send email ASYNCHRONOUSLY (don't wait for it)
-            if ($owner_email) {
-                try {
-                    @require_once "EmailNotification.php";
-                    $emailObj = new EmailNotification();
-                    
-                    // Use @ to suppress errors and don't wait for response
-                    @$emailObj->sendClaimConfirmationEmail(
-                        $owner_email,
-                        $owner_name,
-                        $appliance_name,
-                        $claim_id,
-                        date('F d, Y', strtotime($claim["claim_date"]))
-                    );
-                } catch (Exception $e) {
-                    // Silently fail - don't block the redirect
-                }
-            }
-            
-            // Redirect immediately without waiting for email
+            // Redirect immediately
             header("Location: customer_warranty_tracker.php?claim_success=1");
             exit;
         } else {
