@@ -75,6 +75,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
+
+// Check for success message from claim submission
+$success_message = isset($_GET['claim_success']) ? "Claim submitted successfully! You will receive a confirmation email shortly." : "";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -85,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body style="background: #f5f7fa;">
     <div class="container">
         <div class="header" style="text-align: center; border: none; margin-bottom: 30px;">
             <h1 style="font-size: 36px; color: #667eea; margin-bottom: 10px;">
@@ -93,6 +96,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </h1>
             <p class="subtitle">Track your appliance warranty status easily</p>
         </div>
+
+        <?php if ($success_message): ?>
+            <div class="alert-success" style="margin-bottom: 20px; padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; color: #155724;">
+                <strong><i class="fas fa-check-circle"></i> Success!</strong> <?= htmlspecialchars($success_message) ?>
+            </div>
+        <?php endif; ?>
 
         <div class="card" style="margin-bottom: 30px;">
             <div class="card-header" style="display: flex; align-items: center; gap: 10px;">
