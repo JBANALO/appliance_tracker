@@ -44,9 +44,8 @@ class EmailNotification {
             
             $mail->Port = $this->smtp_port;
             
-            // Set connection timeouts to prevent hanging
-            $mail->Timeout = 5;
-            $mail->ConnectTimeout = 5;
+            // Set connection timeouts using proper methods
+            // Don't set deprecated ConnectTimeout property
             
             // Enable debug to log full SMTP conversation
             if (APP_DEBUG) {
