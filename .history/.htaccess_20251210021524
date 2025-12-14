@@ -17,7 +17,7 @@
 </Files>
 
 # Prevent directory listing
-Options -Indexes
+Options -es
 
 # Force HTTPS (uncomment when SSL is installed)
 # RewriteEngine On

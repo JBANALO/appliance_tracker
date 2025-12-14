@@ -60,51 +60,51 @@ public function viewAppliance($search = "", $status = "", $page = 1, $per_page =
 
 ---
 
-### 2. **NO DATABASE INDEXES** - Slow Queries
+### 2. **NO DATABASE ES** - Slow Queries
 **Severity:** CRITICAL  
 **Impact:** Searches become extremely slow
 
-**Missing Indexes:**
+**Missing es:**
 ```sql
--- appliance table - NO INDEXES!
+-- appliance table - NO ES!
 CREATE TABLE `appliance` (
   `id` int(11) NOT NULL,
-  `serial_number` varchar(100) NOT NULL,  -- ❌ Searched but not indexed
-  `warranty_end_date` date NOT NULL,      -- ❌ Filtered but not indexed
-  `owner_id` int(11) NOT NULL,            -- ❌ Foreign key not indexed
-  PRIMARY KEY (`id`)                      -- ✅ Only id indexed
+  `serial_number` varchar(100) NOT NULL,  -- ❌ Searched but not ed
+  `warranty_end_date` date NOT NULL,      -- ❌ Filtered but not ed
+  `owner_id` int(11) NOT NULL,            -- ❌ Foreign key not ed
+  PRIMARY KEY (`id`)                      -- ✅ Only id ed
 ) ENGINE=InnoDB;
 ```
 
 **Performance Impact:**
-| Records | Query Time (No Index) | Query Time (With Index) |
+| Records | Query Time (No ) | Query Time (With ) |
 |---------|----------------------|-------------------------|
 | 100     | 5ms                  | 1ms                     |
 | 1,000   | 50ms                 | 2ms                     |
 | 10,000  | 500ms (0.5s)         | 3ms                     |
 | 100,000 | 5,000ms (5s!)        | 5ms                     |
 
-**Required Indexes:**
+**Required es:**
 ```sql
--- Add these indexes IMMEDIATELY
+-- Add these es IMMEDIATELY
 ALTER TABLE appliance 
-  ADD INDEX idx_serial_number (serial_number),
-  ADD INDEX idx_warranty_end_date (warranty_end_date),
-  ADD INDEX idx_owner_id (owner_id),
-  ADD INDEX idx_appliance_name (appliance_name);
+  ADD  idx_serial_number (serial_number),
+  ADD  idx_warranty_end_date (warranty_end_date),
+  ADD  idx_owner_id (owner_id),
+  ADD  idx_appliance_name (appliance_name);
 
 ALTER TABLE owner 
-  ADD INDEX idx_email (email),
-  ADD INDEX idx_owner_name (owner_name);
+  ADD  idx_email (email),
+  ADD  idx_owner_name (owner_name);
 
 ALTER TABLE claim 
-  ADD INDEX idx_appliance_id (appliance_id),
-  ADD INDEX idx_claim_status (claim_status),
-  ADD INDEX idx_claim_date (claim_date);
+  ADD  idx_appliance_id (appliance_id),
+  ADD  idx_claim_status (claim_status),
+  ADD  idx_claim_date (claim_date);
 
 ALTER TABLE notification
-  ADD INDEX idx_is_read (is_read),
-  ADD INDEX idx_created_at (created_at);
+  ADD  idx_is_read (is_read),
+  ADD  idx_created_at (created_at);
 ```
 
 ---
@@ -278,8 +278,8 @@ public function connect() {
    - Default: 50 items per page
    - Time: 8 hours
 
-2. **Create Database Indexes** (Priority: CRITICAL)
-   - 4-5 essential indexes
+2. **Create Database es** (Priority: CRITICAL)
+   - 4-5 essential es
    - Time: 2 hours
 
 3. **Optimize Dashboard Queries** (Priority: HIGH)
@@ -308,7 +308,7 @@ public function connect() {
 ### Phase 3: Advanced Scaling (Week 3-4)
 
 7. **Add Search Optimization**
-   - Full-text search indexes
+   - Full-text search es
    - AJAX lazy loading
    - Time: 8 hours
 
@@ -331,40 +331,40 @@ public function connect() {
 ```sql
 -- Run this IMMEDIATELY to improve performance
 
--- Add essential indexes
+-- Add essential es
 USE warranty_tracker;
 
 -- Appliance table
 ALTER TABLE appliance 
-  ADD INDEX idx_serial_number (serial_number),
-  ADD INDEX idx_warranty_end_date (warranty_end_date),
-  ADD INDEX idx_owner_id (owner_id),
-  ADD INDEX idx_appliance_name (appliance_name(50)),
-  ADD INDEX idx_status_date (status, warranty_end_date);
+  ADD  idx_serial_number (serial_number),
+  ADD  idx_warranty_end_date (warranty_end_date),
+  ADD  idx_owner_id (owner_id),
+  ADD  idx_appliance_name (appliance_name(50)),
+  ADD  idx_status_date (status, warranty_end_date);
 
 -- Owner table
 ALTER TABLE owner 
-  ADD INDEX idx_email (email),
-  ADD INDEX idx_owner_name (owner_name(50)),
-  ADD INDEX idx_phone (phone);
+  ADD  idx_email (email),
+  ADD  idx_owner_name (owner_name(50)),
+  ADD  idx_phone (phone);
 
 -- Claim table
 ALTER TABLE claim 
-  ADD INDEX idx_appliance_id (appliance_id),
-  ADD INDEX idx_claim_status (claim_status),
-  ADD INDEX idx_claim_date (claim_date),
-  ADD INDEX idx_status_date (claim_status, claim_date);
+  ADD  idx_appliance_id (appliance_id),
+  ADD  idx_claim_status (claim_status),
+  ADD  idx_claim_date (claim_date),
+  ADD  idx_status_date (claim_status, claim_date);
 
 -- Notification table
 ALTER TABLE notification
-  ADD INDEX idx_is_read (is_read),
-  ADD INDEX idx_created_at (created_at),
-  ADD INDEX idx_read_date (is_read, created_at);
+  ADD  idx_is_read (is_read),
+  ADD  idx_created_at (created_at),
+  ADD  idx_read_date (is_read, created_at);
 
 -- Admin table
 ALTER TABLE admin
-  ADD UNIQUE INDEX idx_email (email),
-  ADD UNIQUE INDEX idx_username (username);
+  ADD UNIQUE  idx_email (email),
+  ADD UNIQUE  idx_username (username);
 
 -- Optimize tables
 OPTIMIZE TABLE appliance, owner, claim, notification, admin;
@@ -377,7 +377,7 @@ ANALYZE TABLE appliance, owner, claim, notification, admin;
 
 ## 🎯 REALISTIC CAPACITY AFTER FIXES
 
-### With Phase 1 Fixes Only (Pagination + Indexes)
+### With Phase 1 Fixes Only (Pagination + es)
 - ✅ **10,000 records** - Smooth
 - ✅ **500 concurrent users** - Manageable
 - ✅ **100,000 records** - Acceptable performance
@@ -442,7 +442,7 @@ You need:
 **Timeline:** 1 week of fixes
 1. ✅ Implement security fixes (from previous audit)
 2. ✅ Add pagination
-3. ✅ Create database indexes
+3. ✅ Create database es
 4. ✅ Test with 1,000+ sample records
 5. ✅ Deploy to VPS
 
@@ -507,7 +507,7 @@ You need:
 ⚠️ **MAYBE** - For 10,000+ users, strongly consider Laravel
 
 ### Best path forward?
-1. **Quick wins** (Week 1): Pagination + Indexes = 10x improvement
+1. **Quick wins** (Week 1): Pagination + es = 10x improvement
 2. **Security** (Week 2): Fix critical security issues
 3. **Performance** (Week 3-4): Caching + optimization
 4. **Deploy** (Week 5): Production launch with monitoring
@@ -517,7 +517,7 @@ You need:
 ---
 
 **Next Steps:** 
-1. Review `SCALABILITY_FIXES.sql` (database indexes)
+1. Review `SCALABILITY_FIXES.sql` (database es)
 2. Review `PAGINATION_IMPLEMENTATION.md` (how to add pagination)
 3. Complete security fixes from previous audit
 4. Load test with realistic data volumes

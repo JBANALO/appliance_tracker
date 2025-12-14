@@ -15,23 +15,23 @@ if (file_exists(__DIR__ . '/.env')) {
 }
 
 // Security Configuration
-define('APP_ENV', getenv('APP_ENV') ?: 'development');
+define('APP_ENV', getenv('APP_ENV') ?: 'production');
 define('APP_DEBUG', getenv('APP_DEBUG') === 'true' ? true : false);
-define('APP_URL', getenv('APP_URL') ?: 'http://localhost');
+define('APP_URL', getenv('APP_URL') ?: 'http://appliancetracker.infinityfreeapp.com');
 
-// Database Configuration
+// Database Configuration - Use environment variables
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'warranty_trackerr');
+define('DB_NAME', getenv('DB_NAME') ?: 'warranty_tracker');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: '');
 
-// Email Configuration
-define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.gmail.com');
+// Email Configuration - Use environment variables (no defaults)
+define('SMTP_HOST', getenv('SMTP_HOST') ?: '');
 define('SMTP_PORT', getenv('SMTP_PORT') ?: 587);
 define('SMTP_USER', getenv('SMTP_USER') ?: '');
 define('SMTP_PASS', getenv('SMTP_PASS') ?: '');
 define('SMTP_FROM_EMAIL', getenv('SMTP_FROM_EMAIL') ?: '');
-define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'Warranty Tracker');
+define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'Appliance Tracker');
 
 // Session Configuration
 define('SESSION_LIFETIME', getenv('SESSION_LIFETIME') ?: 7200);

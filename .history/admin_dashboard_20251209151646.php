@@ -103,7 +103,7 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
             width: 350px;
             max-height: 500px;
             overflow-y: auto;
-            z-index: 1000;
+            z-: 1000;
         }
 
         .notification-dropdown.show {
@@ -393,14 +393,14 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
 
         document.addEventListener('DOMContentLoaded', function() {
             const cards = document.querySelectorAll('.kpi-card');
-            cards.forEach((card, index) => {
+            cards.forEach((card, ) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
                 setTimeout(() => {
                     card.style.transition = 'all 0.5s';
                     card.style.opacity = '1';
                     card.style.transform = 'translateY(0)';
-                }, index * 100);
+                },  * 100);
             });
         });
     </script>
