@@ -9,7 +9,6 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
     exit;
 }
 
-require_once "database.php";
 $error_message = "";
 $success_message = "";
 $email = "";
@@ -19,6 +18,7 @@ if (isset($_GET['logout']) && $_GET['logout'] === 'success') {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    require_once "database.php";
     // Verify CSRF token
     if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
         $error_message = "Invalid request. Please try again.";

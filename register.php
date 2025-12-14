@@ -10,13 +10,12 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
     exit;
 }
 
-require_once "admin.php";
-
 $success_message = "";
 $form = ["username" => "", "name" => "", "email" => "", "password" => "", "confirm_password" => ""];
 $errors = ["username" => "", "name" => "", "email" => "", "password" => "", "confirm_password" => ""];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    require_once "admin.php";
     $form["username"] = trim(htmlspecialchars($_POST["username"] ?? ""));
     $form["name"] = trim(htmlspecialchars($_POST["name"] ?? ""));
     $form["email"] = trim(htmlspecialchars($_POST["email"] ?? ""));

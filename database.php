@@ -16,14 +16,13 @@ class Database {
 
     public function connect() {
         try {
-            $pdo = new PDO("mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4", 
+            $pdo = new PDO("mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4;connect_timeout=5", 
                           $this->username, 
                           $this->password,
                           [
                               PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                               PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                              PDO::ATTR_EMULATE_PREPARES => false,
-                              PDO::ATTR_TIMEOUT => 5  // 5 second timeout
+                              PDO::ATTR_EMULATE_PREPARES => false
                           ]);
             return $pdo;
         } catch (PDOException $e) {
