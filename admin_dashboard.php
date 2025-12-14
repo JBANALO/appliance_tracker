@@ -10,9 +10,9 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 require_once "database.php";
-require_once "Appliance.php";
-require_once "Claim.php";
-require_once "Notification.php";
+require_once "appliance.php";
+require_once "claim.php";
+require_once "notification.php";
 
 $db = new Database();
 $conn = $db->connect();

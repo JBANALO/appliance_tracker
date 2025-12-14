@@ -1,7 +1,7 @@
 <?php
 require_once "database.php";
-require_once "Appliance.php";
-require_once "Claim.php";
+require_once "appliance.php";
+require_once "claim.php";
 
 $claim = [
     "appliance_id" => "", "claim_date" => "", "claim_description" => ""

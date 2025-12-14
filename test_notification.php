@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-require_once "Notification.php";
+require_once "notification.php";
 
 $notificationObj = new Notification();
 

@@ -1,7 +1,7 @@
 <?php
 require_once "database.php";
-require_once "Appliance.php";
-require_once "Owner.php";
+require_once "appliance.php";
+require_once "owner.php";
 
 $applianceObj = new Appliance();
 $ownerObj = new Owner();

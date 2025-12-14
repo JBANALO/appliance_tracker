@@ -10,7 +10,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 require_once "database.php";
-require_once "Appliance.php";
+require_once "appliance.php";
 
 $applianceObj = new Appliance();
 
