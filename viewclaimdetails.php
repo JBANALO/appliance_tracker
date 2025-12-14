@@ -41,7 +41,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (in_array($new_status, $allowed_statuses, true)) {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-            // Send email notification
+            // Redirect IMMEDIATELY without waiting for email
+            header("Location: viewclaim.php?status_updated=1");
+            flush();
+            
+            // Send email notification in background (after redirect)
             try {
                 @$emailNotification = new EmailNotification();
                 @$emailNotification->sendClaimStatusUpdateEmail(
@@ -55,8 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } catch (Exception $e) {
                 // Silently fail - don't block update
             }
-
-            header("Location: viewclaim.php?status_updated=1");
+            
             exit;
         }
     }

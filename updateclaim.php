@@ -25,6 +25,11 @@ if ($id && $status && in_array($status, ['Approved', 'Rejected'])) {
 
     if ($claim->updateClaimStatus($id, $status)) {
       
+        // Redirect immediately
+        header("Location: viewclaim.php");
+        flush();
+        
+        // Send email in background (after redirect)
         $emailNotification = new EmailNotification();
         $emailNotification->sendClaimStatusUpdateEmail(
             $claimDetails['email'],
@@ -34,6 +39,7 @@ if ($id && $status && in_array($status, ['Approved', 'Rejected'])) {
             $status,
             $claimDetails['admin_notes'] ?? ''
         );
+        exit;
     }
 }
 
