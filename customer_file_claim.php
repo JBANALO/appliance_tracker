@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once "database.php";
 require_once "appliance.php";
 require_once "claim.php";
@@ -234,3 +235,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $appliance) {
     </div>
 </body>
 </html>
+<?php ob_end_flush(); ?>
