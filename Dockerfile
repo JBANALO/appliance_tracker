@@ -14,21 +14,20 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && find /var/www/html -type f -exec chmod 644 {} \;
 
-# Configure Nginx with login.php as default 
+# Configure Nginx
 RUN echo 'server { \n\
     listen 80; \n\
     server_name _; \n\
     root /var/www/html; \n\
-     login.php .php .html .htm; \n\
+    index index.php index.html index.htm; \n\
     \n\
     location / { \n\
-        try_files $uri $uri/ /login.php?$query_string; \n\
+        try_files $uri $uri/ /index.php?$query_string; \n\
     } \n\
     \n\
     location ~ \.php$ { \n\
         include fastcgi_params; \n\
         fastcgi_pass 127.0.0.1:9000; \n\
-        fastcgi_ login.php; \n\
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \n\
     } \n\
     \n\
