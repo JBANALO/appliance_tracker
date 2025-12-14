@@ -7,6 +7,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 require_once "claim.php";
+require_once "EmailNotification.php";
 
 $id = $_GET['id'] ?? null;
 
@@ -43,9 +44,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Redirect IMMEDIATELY without waiting for email
             header("Location: viewclaim.php?status_updated=1");
             flush();
-            
-            // Load email class only after redirect
-            require_once "EmailNotification.php";
             
             // Send email notification in background (after redirect)
             try {
