@@ -150,9 +150,13 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
         }
 
         window.onclick = function(event) {
-            if (!event.target.matches('.bell-icon') && !event.target.matches('.notification-badge')) {
-                const dropdown = document.getElementById('notificationDropdown');
-                if (dropdown.classList.contains('show')) {
+            // Don't close dropdown if clicking on notification items or their children
+            const dropdown = document.getElementById('notificationDropdown');
+            const bellIcon = event.target.closest('.notification-bell');
+            const notifItem = event.target.closest('.notification-item');
+            
+            if (!bellIcon && !notifItem) {
+                if (dropdown && dropdown.classList.contains('show')) {
                     dropdown.classList.remove('show');
                 }
             }

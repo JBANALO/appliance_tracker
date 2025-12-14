@@ -1063,7 +1063,7 @@ form.search-form button[type="submit"]:hover {
     max-height: 500px;
     overflow-y: auto;
     display: none;
-    z-: 1000;
+    z-index: 1000;
 }
 
 .notification-dropdown.show {
@@ -1088,6 +1088,7 @@ form.search-form button[type="submit"]:hover {
     color: #667eea;
     text-decoration: none;
     font-size: 12px;
+    cursor: pointer;
 }
 
 .mark-all-read:hover {
@@ -1099,6 +1100,7 @@ form.search-form button[type="submit"]:hover {
     border-bottom: 1px solid #f0f0f0;
     cursor: pointer;
     transition: background 0.2s;
+    pointer-events: auto;
 }
 
 .notification-item:hover {
