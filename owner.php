@@ -1,5 +1,5 @@
-<?php
-require_once 'Database.php';
+﻿<?php
+require_once 'database.php';
 
 class Owner {
     public $id = "";
