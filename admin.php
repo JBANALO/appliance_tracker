@@ -19,6 +19,7 @@ class Admin {
     public function register() {
         $hashed_password = password_hash($this->password, PASSWORD_DEFAULT);
         
+        // Try with verification columns first (new schema)
         $sql = "INSERT INTO admin (username, password, name, email, verification_code, is_verified) 
                 VALUES (:username, :password, :name, :email, :verification_code, :is_verified)";
         
@@ -30,7 +31,21 @@ class Admin {
         $query->bindParam(":verification_code", $this->verification_code);
         $query->bindParam(":is_verified", $this->is_verified);
     
-        return $query->execute();
+        if ($query->execute()) {
+            return true;
+        }
+        
+        // If that fails (old schema), try without verification columns
+        $sql_fallback = "INSERT INTO admin (username, password, name, email) 
+                         VALUES (:username, :password, :name, :email)";
+        
+        $query_fallback = $this->db->connect()->prepare($sql_fallback);
+        $query_fallback->bindParam(":username", $this->username);
+        $query_fallback->bindParam(":password", $hashed_password);
+        $query_fallback->bindParam(":name", $this->name);
+        $query_fallback->bindParam(":email", $this->email);
+    
+        return $query_fallback->execute();
     }
 
     public function verifyEmail($email, $code) {

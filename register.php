@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/security.php';
 
@@ -75,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     // Silently fail - don't block registration
                 }
                 
-                $success_message = "Registration successful! Please check your email to verify your account before logging in.";
+                $success_message = "Registration successful! You can now login with your username and password.";
                 $form = ["username" => "", "name" => "", "email" => "", "password" => "", "confirm_password" => ""];
             } else {
                 $errors["username"] = "Registration failed. Please try again.";
