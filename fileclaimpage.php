@@ -2,6 +2,7 @@
 require_once "database.php";
 require_once "appliance.php";
 require_once "claim.php";
+require_once "EmailNotification.php";
 
 $claim = [
     "appliance_id" => "", "claim_date" => "", "claim_description" => ""
@@ -40,6 +41,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $claimObj->resolution_notes = "";
 
         if ($claimObj->addClaim()) {
+            // Send confirmation email asynchronously (non-blocking)
+            try {
+                @require_once "EmailNotification.php";
+                if (class_exists('EmailNotification')) {
+                    // Get the claim details for email
+                    $db = new Database();
+                    $conn = $db->connect();
+                    
+                    // Get owner and appliance details
+                    $sql = "SELECT o.name as owner_name, o.email, a.appliance_name 
+                            FROM owner o
+                            JOIN appliance a ON o.id = a.owner_id
+                            WHERE a.id = :appliance_id";
+                    $query = $conn->prepare($sql);
+                    $query->bindParam(':appliance_id', $claim["appliance_id"]);
+                    $query->execute();
+                    $owner_info = $query->fetch();
+                    
+                    if ($owner_info) {
+                        $emailNotification = new EmailNotification();
+                        // Get the last inserted claim ID
+                        $last_claim_sql = "SELECT id FROM claim ORDER BY id DESC LIMIT 1";
+                        $last_claim_result = $conn->query($last_claim_sql);
+                        $last_claim = $last_claim_result->fetch();
+                        
+                        @$emailNotification->sendClaimConfirmationEmail(
+                            $owner_info['email'],
+                            $owner_info['owner_name'],
+                            $owner_info['appliance_name'],
+                            $last_claim['id'],
+                            $claim["claim_date"]
+                        );
+                    }
+                }
+            } catch (Exception $e) {
+                // Silently fail - don't block claim submission
+                error_log("Claim confirmation email failed: " . $e->getMessage());
+            }
+            
             header("Location: viewclaim.php?success=1");
             exit;
         } else {
