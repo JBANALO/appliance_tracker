@@ -55,9 +55,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $adminObj->name = $form["name"];
             $adminObj->email = $form["email"];
             
-            // Generate 6-digit verification code
+            // Generate 6-digit verification code (for email verification if needed)
             $adminObj->verification_code = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-            $adminObj->is_verified = 0;
+            // Auto-verify on registration - set to 1 so login works immediately
+            $adminObj->is_verified = 1;
             
             if ($adminObj->register()) {
                 // Send verification email asynchronously (don't wait for it)
