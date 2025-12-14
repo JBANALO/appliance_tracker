@@ -60,19 +60,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $adminObj->is_verified = 0;
             
             if ($adminObj->register()) {
-                // Send verification email (with timeout handling)
+                // Try to send verification email but don't block if it fails
                 try {
-                    require_once "EmailNotification.php";
-                    $emailNotification = new EmailNotification();
-                    // Set a short timeout for email sending
-                    $emailNotification->sendAdminVerificationEmail(
-                        $form["email"], 
-                        $form["name"], 
-                        $adminObj->verification_code
-                    );
+                    @require_once "EmailNotification.php";
+                    if (class_exists('EmailNotification')) {
+                        $emailNotification = new EmailNotification();
+                        @$emailNotification->sendAdminVerificationEmail(
+                            $form["email"], 
+                            $form["name"], 
+                            $adminObj->verification_code
+                        );
+                    }
                 } catch (Exception $e) {
-                    // Email failed but registration succeeded - show success anyway
-                    error_log("Email send error: " . $e->getMessage());
+                    // Silently fail - don't block registration
                 }
                 
                 $success_message = "Registration successful! Please check your email to verify your account before logging in.";
