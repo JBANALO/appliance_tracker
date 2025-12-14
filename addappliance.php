@@ -308,6 +308,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 alert('Please select a valid owner from the list');
             }
         });
+
+        // Auto-calculate warranty status based on warranty end date
+        const warrantyEndDateInput = document.getElementById('warranty_end_date');
+        const statusSelect = document.getElementById('status');
+        
+        function updateWarrantyStatus() {
+            const warrantyEndDate = new Date(warrantyEndDateInput.value);
+            const today = new Date();
+            
+            if (warrantyEndDate && !isNaN(warrantyEndDate)) {
+                if (today > warrantyEndDate) {
+                    statusSelect.value = 'Expired';
+                } else {
+                    statusSelect.value = 'Active';
+                }
+            }
+        }
+        
+        warrantyEndDateInput.addEventListener('change', updateWarrantyStatus);
+        warrantyEndDateInput.addEventListener('blur', updateWarrantyStatus);
     </script>
 </body>
 </html>

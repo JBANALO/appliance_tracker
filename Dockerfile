@@ -35,6 +35,11 @@ RUN echo 'server { \n\
         try_files $uri $uri/ /index.php?$query_string; \n\
     } \n\
     \n\
+    location = /favicon.ico { \n\
+        access_log off; \n\
+        log_not_found off; \n\
+    } \n\
+    \n\
     location ~ \.php$ { \n\
         include fastcgi_params; \n\
         fastcgi_pass 127.0.0.1:9000; \n\
