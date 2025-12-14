@@ -34,7 +34,14 @@ class EmailNotification {
             $mail->SMTPAuth = true;
             $mail->Username = $this->smtp_username;
             $mail->Password = $this->smtp_password;
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            
+            // Use SSL for port 465, STARTTLS for port 587
+            if ($this->smtp_port == 465) {
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            } else {
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            }
+            
             $mail->Port = $this->smtp_port;
             
             // Enable debug to log full SMTP conversation
