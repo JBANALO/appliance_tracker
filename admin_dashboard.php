@@ -59,34 +59,34 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
             <p>Warranty Tracker Management System</p>
             
             <!-- Notification Bell -->
-            <div class="notification-bell">
+            <div class="notification-bell" onclick="toggleNotificationDropdown(event)">
                 <span class="bell-icon"><i class="fas fa-bell"></i></span>
                 <?php if ($unread_count > 0): ?>
                 <span class="notification-badge"><?= $unread_count ?></span>
                 <?php endif; ?>
-                
-                <div class="notification-dropdown" id="notificationDropdown">
-                    <div class="notification-header">
-                        <h3>Notifications</h3>
-                        <?php if ($unread_count > 0): ?>
-                        <a href="mark_all_read.php" class="mark-all-read">Mark all as read</a>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <?php if (count($recent_notifications) > 0): ?>
-                        <?php foreach($recent_notifications as $notif): ?>
-                        <div class="notification-item <?= $notif['is_read'] == 0 ? 'unread' : '' ?>" 
-                             onclick="window.location.href='<?= $notif['link'] ?? '#' ?>'">
-                            <div class="notification-title"><?= htmlspecialchars($notif['title']) ?></div>
-                            <div class="notification-message"><?= htmlspecialchars($notif['message']) ?></div>
-                            <div class="notification-time"><?= date('M d, Y h:i A', strtotime($notif['created_at'])) ?></div>
-                        </div>
-                        <?php endforeach; ?>
-                        <a href="view_all_notifications.php" class="view-all-link">View All Notifications</a>
-                    <?php else: ?>
-                        <div class="no-notifications">No new notifications</div>
+            </div>
+            
+            <div class="notification-dropdown" id="notificationDropdown">
+                <div class="notification-header">
+                    <h3>Notifications</h3>
+                    <?php if ($unread_count > 0): ?>
+                    <a href="mark_all_read.php" class="mark-all-read">Mark all as read</a>
                     <?php endif; ?>
                 </div>
+                
+                <?php if (count($recent_notifications) > 0): ?>
+                    <?php foreach($recent_notifications as $notif): ?>
+                    <div class="notification-item <?= $notif['is_read'] == 0 ? 'unread' : '' ?>" 
+                         onclick="window.location.href='<?= $notif['link'] ?? '#' ?>'">
+                        <div class="notification-title"><?= htmlspecialchars($notif['title']) ?></div>
+                        <div class="notification-message"><?= htmlspecialchars($notif['message']) ?></div>
+                        <div class="notification-time"><?= date('M d, Y h:i A', strtotime($notif['created_at'])) ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                    <a href="view_all_notifications.php" class="view-all-link">View All Notifications</a>
+                <?php else: ?>
+                    <div class="no-notifications">No new notifications</div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -144,35 +144,36 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
     </div>
 
     <script>
+        // Toggle notification dropdown
+        function toggleNotificationDropdown(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notificationDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const bellElement = document.querySelector('.notification-bell');
             const dropdownElement = document.getElementById('notificationDropdown');
             
-            if (bellElement && dropdownElement) {
-                // Click on bell to toggle dropdown
-                bellElement.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    dropdownElement.classList.toggle('show');
-                });
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!bellElement.contains(e.target)) {
-                        dropdownElement.classList.remove('show');
-                    }
-                });
-            }
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (dropdownElement && bellElement && !bellElement.contains(e.target) && !dropdownElement.contains(e.target)) {
+                    dropdownElement.classList.remove('show');
+                }
+            });
 
             // Animation for cards
             const cards = document.querySelectorAll('.kpi-card');
-            cards.forEach((card, ) => {
+            cards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
                 setTimeout(() => {
                     card.style.transition = 'all 0.5s';
                     card.style.opacity = '1';
                     card.style.transform = 'translateY(0)';
-                },  * 100);
+                }, index * 100);
             });
         });
     </script>

@@ -1126,7 +1126,7 @@ form.search-form button[type="submit"]:hover {
     border-bottom: 1px solid #f0f0f0;
     cursor: pointer;
     transition: background 0.2s;
-    pointer-events: auto;
+    pointer-events: auto !important;
 }
 
 .notification-item:hover {
