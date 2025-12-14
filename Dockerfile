@@ -6,6 +6,15 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install mysqli pdo pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
 
+# Configure PHP-FPM to handle more concurrent requests
+RUN echo '[www]\n\
+pm = dynamic\n\
+pm.max_children = 20\n\
+pm.start_servers = 5\n\
+pm.min_spare_servers = 2\n\
+pm.max_spare_servers = 10\n\
+pm.process_idle_timeout = 10s' >> /usr/local/etc/php-fpm.d/www.conf
+
 # Copy application files
 COPY . /var/www/html/
 
@@ -20,6 +29,7 @@ RUN echo 'server { \n\
     server_name _; \n\
     root /var/www/html; \n\
     index index.php index.html index.htm; \n\
+    client_max_body_size 50M; \n\
     \n\
     location / { \n\
         try_files $uri $uri/ /index.php?$query_string; \n\
@@ -29,6 +39,9 @@ RUN echo 'server { \n\
         include fastcgi_params; \n\
         fastcgi_pass 127.0.0.1:9000; \n\
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \n\
+        fastcgi_connect_timeout 60s; \n\
+        fastcgi_send_timeout 60s; \n\
+        fastcgi_read_timeout 60s; \n\
     } \n\
     \n\
     location ~ /\.ht { \n\
