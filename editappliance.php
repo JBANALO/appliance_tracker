@@ -279,29 +279,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <script>
-        // Auto-calculate warranty end date
-        function calculateWarrantyEndDate() {
-            const purchaseDate = document.getElementById('purchase_date').value;
-            const warrantyPeriod = document.getElementById('warranty_period').value;
+        // Auto-calculate warranty period based on purchase date and warranty end date
+        const purchaseDateInput = document.getElementById('purchase_date');
+        const warrantyEndDateInput = document.getElementById('warranty_end_date');
+        const warrantyPeriodInput = document.getElementById('warranty_period');
+        
+        function calculateWarrantyPeriod() {
+            const purchaseDate = new Date(purchaseDateInput.value);
+            const warrantyEndDate = new Date(warrantyEndDateInput.value);
             
-            if (purchaseDate && warrantyPeriod) {
-                const date = new Date(purchaseDate);
-                date.setFullYear(date.getFullYear() + parseInt(warrantyPeriod));
+            if (purchaseDate && warrantyEndDate && !isNaN(purchaseDate) && !isNaN(warrantyEndDate)) {
+                // Calculate difference in years (with decimals)
+                const timeDiff = warrantyEndDate - purchaseDate;
+                const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+                const yearsDiff = Math.round((daysDiff / 365.25) * 100) / 100; // Round to 2 decimals
                 
-             
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                
-                document.getElementById('warranty_end_date').value = `${year}-${month}-${day}`;
+                if (yearsDiff > 0) {
+                    warrantyPeriodInput.value = yearsDiff;
+                }
             }
         }
+
+        purchaseDateInput.addEventListener('change', calculateWarrantyPeriod);
+        warrantyEndDateInput.addEventListener('change', calculateWarrantyPeriod);
         
+        // Also trigger on blur to catch user input
+        purchaseDateInput.addEventListener('blur', calculateWarrantyPeriod);
+        warrantyEndDateInput.addEventListener('blur', calculateWarrantyPeriod);
 
-        document.getElementById('purchase_date').addEventListener('change', calculateWarrantyEndDate);
-        document.getElementById('warranty_period').addEventListener('input', calculateWarrantyEndDate);
-
-       
         const ownerSearch = document.getElementById('owner_search');
         const ownerHidden = document.getElementById('owner_name');
         

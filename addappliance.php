@@ -310,9 +310,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         });
 
-        // Auto-calculate warranty status based on warranty end date
+        // Auto-calculate warranty period based on purchase date and warranty end date
+        const purchaseDateInput = document.getElementById('purchase_date');
         const warrantyEndDateInput = document.getElementById('warranty_end_date');
+        const warrantyPeriodInput = document.getElementById('warranty_period');
         const statusSelect = document.getElementById('status');
+        
+        function calculateWarrantyPeriod() {
+            const purchaseDate = new Date(purchaseDateInput.value);
+            const warrantyEndDate = new Date(warrantyEndDateInput.value);
+            
+            if (purchaseDate && warrantyEndDate && !isNaN(purchaseDate) && !isNaN(warrantyEndDate)) {
+                // Calculate difference in years (with decimals)
+                const timeDiff = warrantyEndDate - purchaseDate;
+                const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+                const yearsDiff = Math.round((daysDiff / 365.25) * 100) / 100; // Round to 2 decimals
+                
+                if (yearsDiff > 0) {
+                    warrantyPeriodInput.value = yearsDiff;
+                }
+            }
+        }
         
         function updateWarrantyStatus() {
             const warrantyEndDate = new Date(warrantyEndDateInput.value);
@@ -327,7 +345,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         
-        warrantyEndDateInput.addEventListener('change', updateWarrantyStatus);
+        purchaseDateInput.addEventListener('change', calculateWarrantyPeriod);
+        warrantyEndDateInput.addEventListener('change', function() {
+            calculateWarrantyPeriod();
+            updateWarrantyStatus();
+        });
+        
+        // Also trigger on blur to catch user input
+        purchaseDateInput.addEventListener('blur', calculateWarrantyPeriod);
+        warrantyEndDateInput.addEventListener('blur', function() {
+            calculateWarrantyPeriod();
+            updateWarrantyStatus();
+        });
         warrantyEndDateInput.addEventListener('blur', updateWarrantyStatus);
     </script>
 </body>
