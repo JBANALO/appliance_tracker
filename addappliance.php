@@ -200,18 +200,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="owner">
                         Owner <span class="required">*</span>
                     </label>
-                    <input type="text" name="owner" id="owner" list="owner-list" value="<?= $appliance["owner"] ?>" placeholder="Search owner by name or email..." required autocomplete="off">
+                    <input type="text" name="owner_search" id="owner_search" list="owner-list" placeholder="Search or type owner name..." required autocomplete="off">
+                    <input type="hidden" name="owner" id="owner_hidden">
                     <datalist id="owner-list">
                         <?php 
                         if ($owners && count($owners) > 0) {
                             foreach ($owners as $owner) {
-                                echo "<option value='{$owner["id"]}' data-name='{$owner["owner_name"]}' data-email='{$owner["email"]}'>{$owner["owner_name"]} - {$owner["email"]}</option>";
+                                echo "<option value='{$owner["owner_name"]}' data-id='{$owner["id"]}' data-email='{$owner["email"]}'>";
                             }
                         }
                         ?>
                     </datalist>
                     <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
-                        <i class="fas fa-info-circle"></i> Type to search by name or email
+                        <i class="fas fa-info-circle"></i> Type or select owner name from the list
                     </small>
                     <?php if ($errors["owner"]): ?>
                         <p class="error"><i class="fas fa-exclamation-circle"></i> <?= $errors["owner"] ?></p>
@@ -256,55 +257,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         document.getElementById('warranty_period').addEventListener('input', calculateWarrantyEndDate);
 
         // Enhanced owner search functionality
-        const ownerInput = document.getElementById('owner');
+        const ownerSearchInput = document.getElementById('owner_search');
+        const ownerHiddenInput = document.getElementById('owner_hidden');
         const ownerDatalist = document.getElementById('owner-list');
         
-        ownerInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
+        ownerSearchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value;
             const options = ownerDatalist.querySelectorAll('option');
             
-            // If user selects from datalist, set the value to owner ID
+            // Search through options for matching name
             options.forEach(option => {
-                const name = option.getAttribute('data-name').toLowerCase();
-                const email = option.getAttribute('data-email').toLowerCase();
-                const displayText = option.text.toLowerCase();
-                
-                if (e.target.value === option.text.split(' - ')[0] || 
-                    e.target.value === option.text) {
-                    e.target.value = option.value;
+                if (option.value.toLowerCase() === searchTerm.toLowerCase()) {
+                    ownerHiddenInput.value = option.getAttribute('data-id');
                 }
             });
         });
-
-        // Show owner name when ID is pre-filled
-        window.addEventListener('DOMContentLoaded', function() {
-            const currentValue = ownerInput.value;
-            if (currentValue) {
-                const options = ownerDatalist.querySelectorAll('option');
-                options.forEach(option => {
-                    if (option.value === currentValue) {
-                        ownerInput.value = option.getAttribute('data-name');
-                    }
-                });
+        
+        ownerSearchInput.addEventListener('change', function(e) {
+            const searchTerm = e.target.value;
+            const options = ownerDatalist.querySelectorAll('option');
+            let found = false;
+            
+            // Search through options for matching name
+            options.forEach(option => {
+                if (option.value.toLowerCase() === searchTerm.toLowerCase()) {
+                    ownerHiddenInput.value = option.getAttribute('data-id');
+                    found = true;
+                }
+            });
+            
+            if (!found) {
+                ownerHiddenInput.value = '';
             }
         });
 
         // Before form submit, ensure we have owner ID
         document.querySelector('form').addEventListener('submit', function(e) {
-            const ownerValue = ownerInput.value;
+            const ownerName = ownerSearchInput.value;
             const options = ownerDatalist.querySelectorAll('option');
             let found = false;
             
             options.forEach(option => {
-                if (option.getAttribute('data-name') === ownerValue || 
-                    option.getAttribute('data-email') === ownerValue ||
-                    option.text.includes(ownerValue)) {
-                    ownerInput.value = option.value;
+                if (option.value.toLowerCase() === ownerName.toLowerCase()) {
+                    ownerHiddenInput.value = option.getAttribute('data-id');
                     found = true;
                 }
             });
             
-            if (!found && isNaN(ownerValue)) {
+            if (!found && ownerName.trim() !== '') {
                 e.preventDefault();
                 alert('Please select a valid owner from the list');
             }
