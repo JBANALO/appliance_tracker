@@ -25,9 +25,6 @@ if ($id && $status && in_array($status, ['Approved', 'Rejected'])) {
 
     if ($claim->updateClaimStatus($id, $status)) {
       
-        // Email sending disabled temporarily due to timeout issues
-        // Will be re-enabled once email service is stable
-        /*
         $emailNotification = new EmailNotification();
         $emailNotification->sendClaimStatusUpdateEmail(
             $claimDetails['email'],
@@ -37,7 +34,6 @@ if ($id && $status && in_array($status, ['Approved', 'Rejected'])) {
             $status,
             $claimDetails['admin_notes'] ?? ''
         );
-        */
     }
 }
 

@@ -41,9 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (in_array($new_status, $allowed_statuses, true)) {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-            // Email sending disabled temporarily due to timeout issues
-            // Will be re-enabled once email service is stable
-            /*
+            // Send email notification
             try {
                 @$emailNotification = new EmailNotification();
                 @$emailNotification->sendClaimStatusUpdateEmail(
@@ -57,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } catch (Exception $e) {
                 // Silently fail - don't block update
             }
-            */
 
             header("Location: viewclaim.php?status_updated=1");
             exit;
