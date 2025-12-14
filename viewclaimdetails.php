@@ -41,11 +41,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (in_array($new_status, $allowed_statuses, true)) {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-            // Redirect IMMEDIATELY without waiting for email
+            // Disconnect client immediately so browser starts navigating
+            header("Connection: close");
+            header("Content-Length: 0");
             header("Location: viewclaim.php?status_updated=1");
+            ob_end_clean();
             flush();
             
-            // Send email notification in background (after redirect)
+            // Send email notification AFTER client disconnects (truly async)
             try {
                 @$emailNotification = new EmailNotification();
                 @$emailNotification->sendClaimStatusUpdateEmail(
@@ -57,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $admin_notes
                 );
             } catch (Exception $e) {
-                // Silently fail - don't block update
+                // Silently fail
             }
             
             exit;

@@ -25,20 +25,27 @@ if ($id && $status && in_array($status, ['Approved', 'Rejected'])) {
 
     if ($claim->updateClaimStatus($id, $status)) {
       
-        // Redirect immediately
+        // Disconnect client to truly disconnect and navigate immediately
+        header("Connection: close");
+        header("Content-Length: 0");
         header("Location: viewclaim.php");
+        ob_end_clean();
         flush();
         
-        // Send email in background (after redirect)
-        $emailNotification = new EmailNotification();
-        $emailNotification->sendClaimStatusUpdateEmail(
-            $claimDetails['email'],
-            $claimDetails['owner_name'],
-            $claimDetails['appliance_name'],
-            $id,
-            $status,
-            $claimDetails['admin_notes'] ?? ''
-        );
+        // Send email AFTER client disconnects (truly async)
+        try {
+            @$emailNotification = new EmailNotification();
+            @$emailNotification->sendClaimStatusUpdateEmail(
+                $claimDetails['email'],
+                $claimDetails['owner_name'],
+                $claimDetails['appliance_name'],
+                $id,
+                $status,
+                $claimDetails['admin_notes'] ?? ''
+            );
+        } catch (Exception $e) {
+            // Silently fail
+        }
         exit;
     }
 }
