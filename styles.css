@@ -1034,6 +1034,17 @@ form.search-form button[type="submit"]:hover {
     cursor: pointer;
     font-size: 24px;
     color: white;
+    z-index: 999;
+    pointer-events: auto;
+}
+
+.notification-bell .bell-icon {
+    display: inline-block;
+    pointer-events: auto;
+}
+
+.notification-bell .bell-icon i {
+    pointer-events: auto;
 }
 
 .notification-badge {

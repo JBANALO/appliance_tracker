@@ -59,7 +59,7 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
             <p>Warranty Tracker Management System</p>
             
             <!-- Notification Bell -->
-            <div class="notification-bell" onclick="toggleNotifications()">
+            <div class="notification-bell">
                 <span class="bell-icon"><i class="fas fa-bell"></i></span>
                 <?php if ($unread_count > 0): ?>
                 <span class="notification-badge"><?= $unread_count ?></span>
@@ -144,7 +144,8 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
     </div>
 
     <script>
-        function toggleNotifications() {
+        function toggleNotifications(event) {
+            event.stopPropagation();
             const dropdown = document.getElementById('notificationDropdown');
             dropdown.classList.toggle('show');
         }
@@ -162,7 +163,13 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
             }
         }
 
+        // Make sure the bell icon is clickable
         document.addEventListener('DOMContentLoaded', function() {
+            const bellElement = document.querySelector('.notification-bell');
+            if (bellElement) {
+                bellElement.addEventListener('click', toggleNotifications);
+            }
+
             const cards = document.querySelectorAll('.kpi-card');
             cards.forEach((card, ) => {
                 card.style.opacity = '0';
