@@ -2,7 +2,7 @@
 require_once "database.php";
 require_once "appliance.php";
 require_once "claim.php";
-require_once "notification.php";
+require_once "Notification.php";
 require_once "EmailNotification.php";
 
 $claim = [

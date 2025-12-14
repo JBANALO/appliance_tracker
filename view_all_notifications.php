@@ -10,7 +10,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 require_once "database.php";
-require_once "notification.php";
+require_once "Notification.php";
 
 $notificationObj = new Notification();
 $all_notifications = $notificationObj->getAllNotifications(50);
