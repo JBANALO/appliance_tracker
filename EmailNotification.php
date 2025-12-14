@@ -37,6 +37,11 @@ class EmailNotification {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = $this->smtp_port;
             
+            // Enable debug to log full SMTP conversation
+            if (APP_DEBUG) {
+                $mail->SMTPDebug = 2;
+            }
+            
       
             $mail->setFrom($this->from_email, $this->from_name);
             $mail->addAddress($to_email, $to_name);
