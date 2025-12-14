@@ -144,32 +144,26 @@ $recent_notifications = $notificationObj->getUnreadNotifications(5);
     </div>
 
     <script>
-        function toggleNotifications(event) {
-            event.stopPropagation();
-            const dropdown = document.getElementById('notificationDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        window.onclick = function(event) {
-            // Don't close dropdown if clicking on notification items or their children
-            const dropdown = document.getElementById('notificationDropdown');
-            const bellIcon = event.target.closest('.notification-bell');
-            const notifItem = event.target.closest('.notification-item');
-            
-            if (!bellIcon && !notifItem) {
-                if (dropdown && dropdown.classList.contains('show')) {
-                    dropdown.classList.remove('show');
-                }
-            }
-        }
-
-        // Make sure the bell icon is clickable
         document.addEventListener('DOMContentLoaded', function() {
             const bellElement = document.querySelector('.notification-bell');
-            if (bellElement) {
-                bellElement.addEventListener('click', toggleNotifications);
+            const dropdownElement = document.getElementById('notificationDropdown');
+            
+            if (bellElement && dropdownElement) {
+                // Click on bell to toggle dropdown
+                bellElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownElement.classList.toggle('show');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!bellElement.contains(e.target)) {
+                        dropdownElement.classList.remove('show');
+                    }
+                });
             }
 
+            // Animation for cards
             const cards = document.querySelectorAll('.kpi-card');
             cards.forEach((card, ) => {
                 card.style.opacity = '0';
