@@ -1,4 +1,10 @@
+
 <?php
+// DEBUG: Enable error reporting for troubleshooting (remove in production)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
@@ -41,14 +47,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (in_array($new_status, $allowed_statuses, true)) {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-            // Redirect immediately and finish request (browser gets response instantly)
-            header("Location: viewclaim.php?status_updated=1");
-            fastcgi_finish_request();
-            
-            // Send email AFTER request is finished (true background processing)
+            // Send email BEFORE redirect, log errors if any
+            $emailError = null;
             try {
-                @$emailNotification = new EmailNotification();
-                @$emailNotification->sendClaimStatusUpdateEmail(
+                $emailNotification = new EmailNotification();
+                $emailNotification->sendClaimStatusUpdateEmail(
                     $claim['email'],
                     $claim['owner_name'],
                     $claim['appliance_name'],
@@ -57,9 +60,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $admin_notes
                 );
             } catch (Exception $e) {
-                // Silently fail
+                $emailError = $e->getMessage();
+                error_log('Email send error: ' . $emailError, 3, __DIR__ . '/logs/email_errors.log');
             }
-            
+            // Redirect after processing
+            header("Location: viewclaim.php?status_updated=1");
             exit;
         }
     }
