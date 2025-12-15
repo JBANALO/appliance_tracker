@@ -46,35 +46,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (in_array($new_status, $allowed_statuses, true)) {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-            // Redirect user immediately
+            // Redirect user immediately and do nothing else
             header("Location: viewclaim.php?status_updated=1");
-            // Output HTML meta refresh as fallback in case header() fails
-            echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=viewclaim.php?status_updated=1"></head><body>If you are not redirected, <a href="viewclaim.php?status_updated=1">click here</a>.</body></html>';
-            // End HTTP response so user is not waiting for email
-            if (function_exists('fastcgi_finish_request')) {
-                fastcgi_finish_request();
-            } else {
-                ignore_user_abort(true);
-                ob_start();
-                echo str_repeat(' ', 1024); // force output
-                header('Connection: close');
-                ob_end_flush();
-                flush();
-            }
-            // Now send email in background
-            try {
-                $emailNotification = new EmailNotification();
-                $emailNotification->sendClaimStatusUpdateEmail(
-                    $claim['email'],
-                    $claim['owner_name'],
-                    $claim['appliance_name'],
-                    $id,
-                    $new_status,
-                    $admin_notes
-                );
-            } catch (Exception $e) {
-                error_log('Email send error: ' . $e->getMessage(), 3, __DIR__ . '/logs/email_errors.log');
-            }
             exit;
         }
     }
