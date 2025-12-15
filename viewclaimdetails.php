@@ -41,14 +41,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (in_array($new_status, $allowed_statuses, true)) {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-            // Disconnect client immediately so browser starts navigating
-            header("Connection: close");
-            header("Content-Length: 0");
+            // Redirect immediately and finish request (browser gets response instantly)
             header("Location: viewclaim.php?status_updated=1");
-            ob_end_clean();
-            flush();
+            fastcgi_finish_request();
             
-            // Send email notification AFTER client disconnects (truly async)
+            // Send email AFTER request is finished (true background processing)
             try {
                 @$emailNotification = new EmailNotification();
                 @$emailNotification->sendClaimStatusUpdateEmail(

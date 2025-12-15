@@ -25,14 +25,11 @@ if ($id && $status && in_array($status, ['Approved', 'Rejected'])) {
 
     if ($claim->updateClaimStatus($id, $status)) {
       
-        // Disconnect client to truly disconnect and navigate immediately
-        header("Connection: close");
-        header("Content-Length: 0");
+        // Redirect immediately and finish request (browser gets response instantly)
         header("Location: viewclaim.php");
-        ob_end_clean();
-        flush();
+        fastcgi_finish_request();
         
-        // Send email AFTER client disconnects (truly async)
+        // Send email AFTER request is finished (true background processing)
         try {
             @$emailNotification = new EmailNotification();
             @$emailNotification->sendClaimStatusUpdateEmail(
