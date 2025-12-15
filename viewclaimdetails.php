@@ -1,4 +1,3 @@
-
 <?php
 // DEBUG: Enable error reporting for troubleshooting (remove in production)
 ini_set('display_errors', 1);
