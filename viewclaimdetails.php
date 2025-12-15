@@ -46,8 +46,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (in_array($new_status, $allowed_statuses, true)) {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
-            // Send email BEFORE redirect, log errors if any
-            $emailError = null;
+            // Redirect user immediately
+            header("Location: viewclaim.php?status_updated=1");
+            // End HTTP response so user is not waiting for email
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            } else {
+                // Fallback for environments without fastcgi_finish_request
+                ignore_user_abort(true);
+                ob_start();
+                echo str_repeat(' ', 1024); // force output
+                header('Connection: close');
+                ob_end_flush();
+                flush();
+            }
+            // Now send email in background
             try {
                 $emailNotification = new EmailNotification();
                 $emailNotification->sendClaimStatusUpdateEmail(
@@ -59,11 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $admin_notes
                 );
             } catch (Exception $e) {
-                $emailError = $e->getMessage();
-                error_log('Email send error: ' . $emailError, 3, __DIR__ . '/logs/email_errors.log');
+                error_log('Email send error: ' . $e->getMessage(), 3, __DIR__ . '/logs/email_errors.log');
             }
-            // Redirect after processing
-            header("Location: viewclaim.php?status_updated=1");
             exit;
         }
     }
