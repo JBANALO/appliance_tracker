@@ -48,11 +48,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($claimObj->updateClaimStatus($id, $new_status, $admin_notes)) {
             // Redirect user immediately
             header("Location: viewclaim.php?status_updated=1");
+            // Output HTML meta refresh as fallback in case header() fails
+            echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=viewclaim.php?status_updated=1"></head><body>If you are not redirected, <a href="viewclaim.php?status_updated=1">click here</a>.</body></html>';
             // End HTTP response so user is not waiting for email
             if (function_exists('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             } else {
-                // Fallback for environments without fastcgi_finish_request
                 ignore_user_abort(true);
                 ob_start();
                 echo str_repeat(' ', 1024); // force output
