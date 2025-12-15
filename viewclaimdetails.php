@@ -1,4 +1,6 @@
 <?php
+// Start output buffering to prevent any accidental output before header redirect
+ob_start();
 // DEBUG: Enable error reporting for troubleshooting (remove in production)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
